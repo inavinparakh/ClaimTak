@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClaimTak CRM - Insurance Claim Management</title>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: #f4f7fc;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0a2e5c, #1a4f8a);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .header h1 i {
+            color: #ffc107;
+            margin-right: 10px;
+        }
+        .header span {
+            font-size: 14px;
+            background: rgba(255,255,255,0.15);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+        .backup-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+        }
+        .btn-primary { background: #0a2e5c; }
+        .btn-primary:hover { background: #1a4f8a; transform: translateY(-2px); }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #218838; transform: translateY(-2px); }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; transform: translateY(-2px); }
+        .btn-warning { background: #ffc107; color: #333; }
+        .btn-warning:hover { background: #e0a800; transform: translateY(-2px); }
+        .btn-outline { background: transparent; border: 2px solid white; }
+        .btn-outline:hover { background: white; color: #0a2e5c; }
+        .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+        /* Card Layout */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #0a2e5c;
+            border-left: 5px solid #ffc107;
+            padding-left: 12px;
+        }
+
+        /* Form */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 4px;
+            color: #333;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: #1a4f8a;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26,79,138,0.1);
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 40px;
+        }
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        /* Table */
+        .table-responsive {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th {
+            background: #e9eef4;
+            color: #0a2e5c;
+            padding: 12px 10px;
+            text-align: left;
+            white-space: nowrap;
+        }
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+        tr:hover {
+            background: #f8faff;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .status-new { background: #cce5ff; color: #004085; }
+        .status-progress { background: #fff3cd; color: #856404; }
+        .status-lokpal { background: #f8d7da; color: #721c24; }
+        .status-result { background: #d1ecf1; color: #0c5460; }
+        .status-settled { background: #d4edda; color: #155724; }
+
+        .action-icons i {
+            font-size: 18px;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .action-icons i.fa-edit { color: #1a4f8a; }
+        .action-icons i.fa-edit:hover { color: #0a2e5c; transform: scale(1.1); }
+        .action-icons i.fa-trash { color: #dc3545; }
+        .action-icons i.fa-trash:hover { color: #a71d2a; transform: scale(1.1); }
+
+        .empty-msg {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+            font-size: 16px;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .header { flex-direction: column; align-items: start; gap: 10px; }
+            .header h1 { font-size: 22px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .backup-actions { width: 100%; justify-content: start; }
+        }
+        /* Hide/Show */
+        .hidden { display: none; }
+        #editId { display: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div>
+            <h1><i class="fas fa-shield-alt"></i> ClaimTak CRM</h1>
+            <span><i class="fas fa-phone-alt"></i> लढा तुमच्या हक्कासाठी</span>
+        </div>
+        <div class="backup-actions">
+            <button class="btn btn-outline btn-sm" onclick="exportBackup()"><i class="fas fa-download"></i> Export JSON (Drive Backup)</button>
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('importInput').click()"><i class="fas fa-upload"></i> Import JSON (Restore)</button>
+            <input type="file" id="importInput" accept=".json" style="display:none" onchange="importBackup(event)">
+            <button class="btn btn-success btn-sm" onclick="clearAllData()"><i class="fas fa-trash-alt"></i> Clear All</button>
+        </div>
+    </div>
+
+    <!-- ADD / EDIT FORM -->
+    <div class="card">
+        <div class="card-title" id="formTitle"><i class="fas fa-plus-circle"></i> नवीन क्लेम नोंदवा</div>
+        <form id="claimForm" onsubmit="saveClaim(event)">
+            <div class="form-grid">
+                <!-- Client -->
+                <div class="form-group"><label>क्लायंट नाव *</label><input type="text" id="clientName" required placeholder="उदा. रमेश पाटील"></div>
+                <div class="form-group"><label>मोबाइल *</label><input type="text" id="mobile" required placeholder="9820XXXXXX"></div>
+                <div class="form-group"><label>ईमेल</label><input type="email" id="email" placeholder="ramesh@email.com"></div>
+                <div class="form-group"><label>पत्ता</label><input type="text" id="address" placeholder="मुंबई, महाराष्ट्र"></div>
+                <!-- Policy -->
+                <div class="form-group"><label>पॉलिसी क्र.</label><input type="text" id="policyNo" placeholder="POL123456"></div>
+                <div class="form-group"><label>विमा कंपनी</label><input type="text" id="insuranceCompany" placeholder="उदा. LIC, Star Health"></div>
+                <div class="form-group"><label>पॉलिसी प्रकार</label>
+                    <select id="policyType"><option value="Life">जीवन (Life)</option><option value="Health" selected>आरोग्य (Health)</option></select>
+                </div>
+                <!-- Claim -->
+                <div class="form-group"><label>क्लेम क्र.</label><input type="text" id="claimNo" placeholder="CLM7890"></div>
+                <div class="form-group"><label>क्लेम रक्कम (₹)</label><input type="number" id="claimAmount" placeholder="500000"></div>
+                <div class="form-group"><label>क्लेम दिनांक</label><input type="date" id="claimDate"></div>
+                <div class="form-group"><label>नकार दिनांक</label><input type="date" id="rejectDate"></div>
+                <div class="form-group"><label>नकार कारण</label><input type="text" id="rejectReason" placeholder="उदा. डॉक्युमेंट्स अपूर्ण"></div>
+                <!-- Status & Assignee -->
+                <div class="form-group"><label>स्थिती</label>
+                    <select id="status">
+                        <option value="नवीन">नवीन</option>
+                        <option value="प्रगतीपथावर">प्रगतीपथावर</option>
+                        <option value="लोकपालाकडे दाखल">लोकपालाकडे दाखल</option>
+                        <option value="निकाल आला">निकाल आला</option>
+                        <option value="सेटल झाला">सेटल झाला</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>जबाबदार व्यक्ती</label><input type="text" id="assignee" placeholder="टीम मेंबरचे नाव"></div>
+                <div class="form-group"><label>टिप्पणी / कृती</label><textarea id="notes" rows="2" placeholder="नवीनतम अपडेट..."></textarea></div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="submitBtn"><i class="fas fa-save"></i> क्लेम सेव्ह करा</button>
+                <button type="button" class="btn btn-warning" id="cancelEditBtn" onclick="cancelEdit()"><i class="fas fa-times"></i> रद्द करा</button>
+                <input type="hidden" id="editId" value="">
+            </div>
+        </form>
+    </div>
+
+    <!-- CLAIM LIST -->
+    <div class="card">
+        <div class="card-title"><i class="fas fa-list"></i> सर्व क्लेम <span id="countDisplay" style="font-size:14px;font-weight:400;color:#666;"></span></div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>क्र.</th><th>क्लायंट</th><th>मोबाइल</th><th>पॉलिसी</th><th>कंपनी</th>
+                        <th>क्लेम रक्कम</th><th>स्थिती</th><th>जबाबदार</th><th>कृती</th>
+                    </tr>
+                </thead>
+                <tbody id="claimTableBody">
+                    <tr><td colspan="9" class="empty-msg">अद्याप कोणताही क्लेम नोंदवलेला नाही. वरील फॉर्म भरा.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- DATA LAYER ----------
+    let claims = [];
+
+    // Load from localStorage
+    function loadData() {
+        const stored = localStorage.getItem('claimtak_claims');
+        if (stored) {
+            try { claims = JSON.parse(stored); } catch(e){ claims = []; }
+        } else {
+            // Seed demo data for testing
+            claims = [
+                { id: '1', clientName: 'सुरेश शर्मा', mobile: '9876543210', email: 'suresh@mail.com', address: 'पुणे', policyNo: 'POL101', insuranceCompany: 'LIC', policyType: 'Life', claimNo: 'CLM001', claimAmount: '500000', claimDate: '2025-01-10', rejectDate: '2025-02-15', rejectReason: 'डॉक्युमेंट्स अपूर्ण', status: 'प्रगतीपथावर', assignee: 'अनिल', notes: 'लोकपालाकडे पाठवले' },
+                { id: '2', clientName: 'मीना जोशी', mobile: '9823456789', email: 'meena@mail.com', address: 'मुंबई', policyNo: 'POL202', insuranceCompany: 'Star Health', policyType: 'Health', claimNo: 'CLM002', claimAmount: '250000', claimDate: '2025-03-01', rejectDate: '2025-03-20', rejectReason: 'प्री-एक्झिस्टिंग', status: 'लोकपालाकडे दाखल', assignee: 'प्रिया', notes: 'नवीन कागदपत्रे जोडली' }
+            ];
+        }
+        renderTable();
+        updateCount();
+    }
+
+    function saveToLocal() {
+        localStorage.setItem('claimtak_claims', JSON.stringify(claims));
+    }
+
+    // ---------- RENDER TABLE ----------
+    function renderTable() {
+        const tbody = document.getElementById('claimTableBody');
+        if (claims.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="empty-msg">अद्याप कोणताही क्लेम नोंदवलेला नाही. वरील फॉर्म भरा.</td></tr>`;
+            return;
+        }
+        let html = '';
+        claims.forEach((c, index) => {
+            const statusClass = 
+                c.status === 'नवीन' ? 'status-new' :
+                c.status === 'प्रगतीपथावर' ? 'status-progress' :
+                c.status === 'लोकपालाकडे दाखल' ? 'status-lokpal' :
+                c.status === 'निकाल आला' ? 'status-result' : 'status-settled';
+            html += `<tr>
+                <td>${index + 1}</td>
+                <td><strong>${c.clientName || ''}</strong></td>
+                <td>${c.mobile || ''}</td>
+                <td>${c.policyNo || ''}</td>
+                <td>${c.insuranceCompany || ''}</td>
+                <td>₹${parseInt(c.claimAmount || 0).toLocaleString()}</td>
+                <td><span class="status-badge ${statusClass}">${c.status || 'नवीन'}</span></td>
+                <td>${c.assignee || '-'}</td>
+                <td class="action-icons">
+                    <i class="fas fa-edit" onclick="editClaim('${c.id}')" title="Edit"></i>
+                    <i class="fas fa-trash" onclick="deleteClaim('${c.id}')" title="Delete"></i>
+                </td>
+            </tr>`;
+        });
+        tbody.innerHTML = html;
+    }
+
+    function updateCount() {
+        document.getElementById('countDisplay').textContent = `(एकूण ${claims.length} क्लेम)`;
+    }
+
+    // ---------- CRUD OPERATIONS ----------
+    function saveClaim(e) {
+        e.preventDefault();
+        const id = document.getElementById('editId').value;
+        const data = {
+            clientName: document.getElementById('clientName').value.trim(),
+            mobile: document.getElementById('mobile').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            address: document.getElementById('address').value.trim(),
+            policyNo: document.getElementById('policyNo').value.trim(),
+            insuranceCompany: document.getElementById('insuranceCompany').value.trim(),
+            policyType: document.getElementById('policyType').value,
+            claimNo: document.getElementById('claimNo').value.trim(),
+            claimAmount: document.getElementById('claimAmount').value.trim(),
+            claimDate: document.getElementById('claimDate').value,
+            rejectDate: document.getElementById('rejectDate').value,
+            rejectReason: document.getElementById('rejectReason').value.trim(),
+            status: document.getElementById('status').value,
+            assignee: document.getElementById('assignee').value.trim(),
+            notes: document.getElementById('notes').value.trim()
+        };
+
+        if (id) {
+            // Edit mode
+            const index = claims.findIndex(c => c.id === id);
+            if (index !== -1) {
+                claims[index] = { ...claims[index], ...data };
+            }
+            document.getElementById('formTitle').innerHTML = '<i class="fas fa-plus-circle"></i> नवीन क्लेम नोंदवा';
+            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> क्लेम सेव्ह करा';
+            document.getElementById('editId').value = '';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+        } else {
+            // Add mode
+            const newClaim = { ...data, id: Date.now().toString() };
+            claims.push(newClaim);
+        }
+
+        saveToLocal();
+        renderTable();
+        updateCount();
+        document.getElementById('claimForm').reset();
+        document.getElementById('status').value = 'नवीन'; // reset default
+        // Reset dates to empty
+        document.getElementById('claimDate').value = '';
+        document.getElementById('rejectDate').value = '';
+    }
+
+    function editClaim(id) {
+        const claim = claims.find(c => c.id === id);
+        if (!claim) return;
+        document.getElementById('editId').value = id;
+        document.getElementById('clientName').value = claim.clientName || '';
+        document.getElementById('mobile').value = claim.mobile || '';
+        document.getElementById('email').value = claim.email || '';
+        document.getElementById('address').value = claim.address || '';
+        document.getElementById('policyNo').value = claim.policyNo || '';
+        document.getElementById('insuranceCompany').value = claim.insuranceCompany || '';
+        document.getElementById('policyType').value = claim.policyType || 'Health';
+        document.getElementById('claimNo').value = claim.claimNo || '';
+        document.getElementById('claimAmount').value = claim.claimAmount || '';
+        document.getElementById('claimDate').value = claim.claimDate || '';
+        document.getElementById('rejectDate').value = claim.rejectDate || '';
+        document.getElementById('rejectReason').value = claim.rejectReason || '';
+        document.getElementById('status').value = claim.status || 'नवीन';
+        document.getElementById('assignee').value = claim.assignee || '';
+        document.getElementById('notes').value = claim.notes || '';
+
+        document.getElementById('formTitle').innerHTML = '<i class="fas fa-edit"></i> क्लेम एडिट करा';
+        document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> अपडेट करा';
+        document.getElementById('cancelEditBtn').style.display = 'inline-flex';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelEdit() {
+        document.getElementById('editId').value = '';
+        document.getElementById('claimForm').reset();
+        document.getElementById('status').value = 'नवीन';
+        document.getElementById('claimDate').value = '';
+        document.getElementById('rejectDate').value = '';
+        document.getElementById('formTitle').innerHTML = '<i class="fas fa-plus-circle"></i> नवीन क्लेम नोंदवा';
+        document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> क्लेम सेव्ह करा';
+        document.getElementById('cancelEditBtn').style.display = 'none';
+    }
+
+    function deleteClaim(id) {
+        if (confirm('हा क्लेम कायमचा हटवायचा का?')) {
+            claims = claims.filter(c => c.id !== id);
+            saveToLocal();
+            renderTable();
+            updateCount();
+            cancelEdit();
+        }
+    }
+
+    function clearAllData() {
+        if (confirm('सर्व क्लेम कायमचे डिलीट होतील. नक्की?')) {
+            claims = [];
+            saveToLocal();
+            renderTable();
+            updateCount();
+            cancelEdit();
+        }
+    }
+
+    // ---------- BACKUP (GOOGLE DRIVE / GITHUB) ----------
+    function exportBackup() {
+        const dataStr = JSON.stringify(claims, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `claims-backup-${new Date().toISOString().slice(0,10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        alert('✅ Backup JSON डाउनलोड झाला. हा फाइल Google Drive वर किंवा GitHub Repo मध्ये सेव्ह करा.');
+    }
+
+    function importBackup(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const imported = JSON.parse(e.target.result);
+                if (Array.isArray(imported)) {
+                    if (confirm(`एकूण ${imported.length} क्लेम आयात होतील. सध्याचे सर्व क्लेम बदलतील. सुरू ठेवायचे?`)) {
+                        claims = imported;
+                        saveToLocal();
+                        renderTable();
+                        updateCount();
+                        cancelEdit();
+                        alert('✅ यशस्वीरीत्या आयात झाले!');
+                    }
+                } else {
+                    alert('❌ अवैध फाइल. योग्य JSON backup फाइल निवडा.');
+                }
+            } catch(err) {
+                alert('❌ फाइल वाचता आली नाही. कृपया योग्य JSON फाइल पहा.');
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = ''; // reset file input
+    }
+
+    // ---------- INIT ----------
+    loadData();
+    document.getElementById('cancelEditBtn').style.display = 'none';
+</script>
+</body>
+</html>
